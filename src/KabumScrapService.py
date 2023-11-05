@@ -6,27 +6,22 @@ from core.logger.Logger import Logger
 
 class KabumScrapService():
 
-    def __init__(self, search_price: int) -> None:
+    def __init__(self, min_value: int, max_value: int) -> None:
         self.products_list = []
-        self.search_price = search_price
+        self.min_value = min_value
+        self.max_value = max_value
         self.scrap_core = RequisitionService()
         self.logger = Logger()
 
-        self.min_value = 1000  # Setar valor mínimo da busca
-
     def scrap_init(self) -> None:
         """"""
+        scrap_result = None
         try:
-            site_response = self.scrap_core.send_http_client(
-                method='get', url='https://www.kabum.com.br/', body=None)
-            if site_response is None:
-                raise Exception('O site "kabum.com.br" está fora do ar!')
-
             self.logger.send_info_message(f'Iniciando a busca por produtos no site "kabum.com.br" com valor mínimo de ' +
-                                          f'R${self.min_value} até R${self.search_price}')
-
-            search_url = self.get_default_endpoint(page_number=1)
+                                          f'R${self.min_value} até R${self.max_value}')
             time.sleep(5)
+            search_url = self.get_default_endpoint(page_number=1)
+
             response = self.scrap_core.send_http_client(
                 method='get',
                 url=search_url,
@@ -38,7 +33,12 @@ class KabumScrapService():
                 self.get_search_pagination(
                     page_number=2, total_pages=total_pages)
 
-            self.make_product_json()
+            if len(self.products_list) > 0:
+                self.make_product_json()
+            else:
+                self.logger.send_info_message(
+                    'Nenhum produto encontrado para os valores inseridos na pesquisa')
+                return scrap_result
 
             self.logger.send_info_message(
                 'Foi finalizada com sucesso a busca por produtos no site "kabum.com.br"!')
@@ -65,7 +65,7 @@ class KabumScrapService():
     def get_products_data(self, products_data: dict) -> dict:
         """"""
         for product in products_data.get('data'):
-            if product.get("attributes")["price"] <= self.search_price\
+            if product.get("attributes")["price"] <= self.max_value\
                     and product.get("attributes")["price"] > self.min_value:
                 product_price = f'R${product.get("attributes")["price"]}'
                 self.logger.send_info_message(f'Foi encontrado um produto no valor de {product_price}, ' +
@@ -116,3 +116,8 @@ class KabumScrapService():
 
     def get_value_black_friday_with_discount(self, product: dict) -> str:
         return f'R${product.get("attributes")["offer"]["price_with_discount"]}' if product.get("attributes").get("offer") else ''
+
+    # def get_default_endpoint(self, page_number: int) -> str:
+    #     """Busca Cafeteira Dolce Gusto"""
+    #     default_endpoint = f'https://servicespub.prod.api.aws.grupokabum.com.br/catalog/v2/products?page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&query=Dolce+Gusto&include=gift'
+    #     return default_endpoint
