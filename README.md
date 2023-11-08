@@ -1,0 +1,6 @@
+- TODO corrigir erros geradoras durante a inserção de valores com ',' e '.'
+- TODO implementar inteligência para converter esses valores para o formato correto
+- TODO gerar arquivo .CSV no lugar de .JSON e implementar lógica para criar a planilha com os produtos
+- TODO implementar serviço de envio de e-mail contendo a planilha com os produtos encontrado
+- TODO vincular serviço de scrap a algum framework Python e utilizar uma rota para inserir os valores via API
+- TODO criar uma lógica para extrair o link de cada produto, pois a API não retorna o link do produto
