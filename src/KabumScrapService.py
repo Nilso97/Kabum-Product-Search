@@ -20,7 +20,7 @@ class KabumScrapService():
             self.__default_message = 'Kabum WebScraping Service -'
             self.logger.send_info_msg(f'{self.__default_message} Iniciando a busca por produtos no site "kabum.com.br" com valor mínimo de ' +
                                       f'R${self.min_value} até R${self.max_value}')
-            # time.sleep(5)
+            time.sleep(5)
             search_url = self.get_default_endpoint(page_number=1)
 
             response = self.scrap_core.send_http_client(
@@ -35,7 +35,7 @@ class KabumScrapService():
                     page_number=2, total_pages=total_pages)
 
             if len(self.products_list) > 0:
-                self.make_product_json()
+                self.make_products_json()
             else:
                 self.logger.send_info_msg(
                     f'{self.__default_message} Nenhum produto encontrado para os valores inseridos na pesquisa')
@@ -52,7 +52,7 @@ class KabumScrapService():
         finally:
             return scrap_result
 
-    def make_product_json(self) -> None:
+    def make_products_json(self) -> None:
         """"""
         try:
             self.logger.send_info_msg(
@@ -87,7 +87,7 @@ class KabumScrapService():
             while total_pages >= page_number:
                 self.logger.send_info_msg(
                     f'{self.__default_message} Realizando a pesquisa na página {page_number} de {total_pages}')
-                # time.sleep(1)
+                time.sleep(1)
                 paginate_response = self.scrap_core.send_http_client(
                     method='get', url=self.get_default_endpoint(page_number=page_number), body=None)
                 self.get_products_data(
