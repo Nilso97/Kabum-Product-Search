@@ -6,7 +6,7 @@ from core.logger.LoggerService import LoggerService
 
 class KabumScrapService():
 
-    def __init__(self, min_value: any, max_value: any) -> None:
+    def __init__(self, min_value: str, max_value: str) -> None:
         self.products_list = []
         self.min_value = int(min_value)
         self.max_value = int(max_value)
