@@ -1,14 +1,14 @@
 import http.client
-from core.logger.LoggerService import LoggerService
+from logs.logger.Logger import Logger
 from core.http.IRequisitionService import IRequisitionService
 
 
 class RequisitionService(IRequisitionService):
 
     def __init__(self) -> None:
+        self.logger = Logger()
         self.conn = http.client.HTTPSConnection(host='kabum.com.br', port=443)
-        self.logger = LoggerService()
-
+        
     def send_http_client(self, method: str, url: str, body: dict = {}) -> str:
         """"""
         try:
@@ -36,13 +36,12 @@ class RequisitionService(IRequisitionService):
             if response.status != 200 or not response:
                 raise Exception('O site "kabum.com.br" está fora do ar!')
 
-            final_response = self.convert_bytes_in_str(response=response)
+            converted_response = self.convert_bytes_in_str(response=response)
         except (Exception) as error:
-            final_response = str(error)
-            self.logger.send_error_msg(
-                f'Erro na função "send_http_client()" -> {final_response}')
+            converted_response = str(error)
+            self.logger.error(f'Erro na função "send_http_client()" -> {converted_response}')
         finally:
-            return final_response
+            return converted_response
 
     def convert_request_params(self, method: str) -> str:
         """"""
