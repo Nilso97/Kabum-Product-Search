@@ -2,19 +2,27 @@ import json
 import time
 import httpx
 import asyncio
-from logs.logger.Logger import Logger
-from core.http.RequisitionService import RequisitionService
+from src.core.sheets.SheetsCore import SheetsCore
+from src.core.http.RequisitionService import RequisitionService
+from src.logs.logger.Logger import Logger
 from src.services.IKabumConsultService import IKabumConsultService
 
 
 class KabumConsultService(IKabumConsultService):
 
-    def __init__(self, min_value: str, max_value: str) -> None:
+    def __init__(
+        self, 
+        min_value: int, 
+        max_value: int, 
+        search_product: str
+    ) -> None:
         self.logger = Logger()
         self.products_list = []
-        self.min_value = int(min_value)
-        self.max_value = int(max_value)
+        self.min_value = min_value
+        self.max_value = max_value
+        self.search_product = search_product
         self.http_request = RequisitionService()
+        self.sheets_core = SheetsCore()
 
     def consult_service_init(self) -> None:
         asyncio.run(self.get_consult_products())
@@ -41,26 +49,14 @@ class KabumConsultService(IKabumConsultService):
                 )
 
             if len(self.products_list) > 0:
-                await self.make_products_json()
+                self.sheets_core.create_xlsx(products_list=self.products_list)
+                self.logger.information(f'Foram encontrados {len(self.products_list)} produtos, dentre os valores inseridos na pesquisa')
+                self.logger.information('Finalizada com sucesso a busca por produtos no site "kabum.com.br"')
             else:
                 self.logger.information('Nenhum produto encontrado para os valores inseridos na pesquisa')
                 return
-
-            self.logger.information(f'Foram encontrados {len(self.products_list)} produtos, dentre os valores inseridos na pesquisa')
-            self.logger.information('Finalizada com sucesso a busca por produtos no site "kabum.com.br"')
         except (Exception) as error:
-            error_message = str(error)
-            self.logger.error(f'Erro na função "scrap_request()" -> {error_message}')
-
-    async def make_products_json(self) -> None:
-        """"""
-        try:
-            self.logger.information(f'Gerando arquivo ".json" contendo os produtos encontrados\n\nAguarde...')
-            with open("./produtos_kabum.json", "w") as json_file:
-                json.dump(self.products_list, json_file, indent=4)
-        except (Exception) as error:
-            json_error = str(error)
-            self.logger.error(f'Erro na função "make_product_json()" -> {json_error}')
+            self.logger.error(f'Erro durante a busca por produtos no site da Kabum: {error}')
 
     async def get_products_data(self, products_data: dict) -> None:
         """"""
@@ -104,10 +100,10 @@ class KabumConsultService(IKabumConsultService):
     async def get_consult_endpoint(self, page_number: int) -> str:
         """"""
         endpoint = 'https://servicespub.prod.api.aws.grupokabum.com.br'
-        endpoint += '/catalog/v2/products-by-category/computadores/notebooks?'
+        endpoint += f'/catalog/v2/products-by-category/celular-smartphone/smartphones/{self.search_product}?'
         endpoint += f'page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&include=gift'
         return endpoint
-
+  
     async def get_value_with_discount_prime_ninja(self, product: dict) -> str:
         return f'R${product.get("attributes")["prime"]["price_with_discount"]}'\
             if product.get("attributes").get("prime") else 'Não possui desconto com o Prime Ninja'

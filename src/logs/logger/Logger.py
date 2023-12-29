@@ -1,5 +1,5 @@
 import logging
-from logs.logger.ILogger import ILogger
+from src.logs.logger.ILogger import ILogger
 
 
 class Logger(ILogger):
@@ -12,10 +12,10 @@ class Logger(ILogger):
         logging.basicConfig(level=logging.INFO,format=message_format, datefmt='%d/%m/%Y %I:%M:%S')
 
     def information(self, message: str) -> None:
-        logging.info(f'KABUM - Consulta de preços - {message}')
+        logging.info(f'KABUM - Consulta de Produtos - {message}')
 
     def error(self, message: str) -> None:
-        logging.error(f'KABUM - Consulta de preços - {message}')
+        logging.error(f'KABUM - Consulta de Produtos - {message}')
 
     def alert(self, message: str) -> None:
-        logging.warning(f'KABUM - Consulta de preços - {message}')
+        logging.warning(f'KABUM - Consulta de Produtos - {message}')
