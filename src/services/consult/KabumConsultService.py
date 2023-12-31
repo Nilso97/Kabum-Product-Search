@@ -2,10 +2,13 @@ import json
 import time
 import httpx
 import asyncio
+from typing import Type
+from src.logs.logger.ILogger import ILogger
 from src.core.sheets.SheetsCore import SheetsCore
+from src.utils.ConvertValues import ConvertValues
+from src.services.email.EmailService import EmailService
 from src.core.http.RequisitionService import RequisitionService
-from src.logs.logger.Logger import Logger
-from src.services.IKabumConsultService import IKabumConsultService
+from src.services.consult.IKabumConsultService import IKabumConsultService
 
 
 class KabumConsultService(IKabumConsultService):
@@ -14,21 +17,29 @@ class KabumConsultService(IKabumConsultService):
         self, 
         min_value: int, 
         max_value: int, 
-        search_product: str
+        search_product: str,
+        logger: Type[ILogger]
     ) -> None:
-        self.logger = Logger()
+        self.logger = logger
         self.products_list = []
         self.min_value = min_value
         self.max_value = max_value
         self.search_product = search_product
-        self.http_request = RequisitionService()
-        self.sheets_core = SheetsCore()
+        self.convert_values = ConvertValues()
+        self.http_request = RequisitionService(logger=self.logger)
+        self.sheets_core = SheetsCore(
+            logger=self.logger,
+            convert_values=self.convert_values
+        )
+        self.email_service = EmailService(
+            logger=self.logger, 
+            convert_values=self.convert_values
+        )
 
     def consult_service_init(self) -> None:
         asyncio.run(self.get_consult_products())
     
     async def get_consult_products(self) -> None:
-        """"""
         try:
             self.logger.information('Iniciando a busca por produtos no site "kabum.com.br" com valor mínimo de ' +
                                       f'R${self.min_value} até R${self.max_value}')
@@ -52,6 +63,7 @@ class KabumConsultService(IKabumConsultService):
                 self.sheets_core.create_xlsx(products_list=self.products_list)
                 self.logger.information(f'Foram encontrados {len(self.products_list)} produtos, dentre os valores inseridos na pesquisa')
                 self.logger.information('Finalizada com sucesso a busca por produtos no site "kabum.com.br"')
+                self.email_service.send_email()
             else:
                 self.logger.information('Nenhum produto encontrado para os valores inseridos na pesquisa')
                 return
@@ -59,7 +71,6 @@ class KabumConsultService(IKabumConsultService):
             self.logger.error(f'Erro durante a busca por produtos no site da Kabum: {error}')
 
     async def get_products_data(self, products_data: dict) -> None:
-        """"""
         for product in products_data.get('data'):
             if product.get("attributes")["price"] <= self.max_value\
                     and product.get("attributes")["price"] > self.min_value:
@@ -77,7 +88,6 @@ class KabumConsultService(IKabumConsultService):
                 })
     
     async def consult_pagination(self, page_number: int, total_pages: int) -> None:
-        """"""
         consult_tasks = []
         try:
             async with httpx.AsyncClient(timeout=3000, follow_redirects=True) as client:
@@ -98,20 +108,19 @@ class KabumConsultService(IKabumConsultService):
             self.logger.error( f'Erro na função "consult_pagination()" -> {error_message}')
     
     async def get_consult_endpoint(self, page_number: int) -> str:
-        """"""
         endpoint = 'https://servicespub.prod.api.aws.grupokabum.com.br'
-        endpoint += f'/catalog/v2/products-by-category/celular-smartphone/smartphones/{self.search_product}?'
+        endpoint += f'/catalog/v2/products-by-category/computadores/{self.search_product}?'
         endpoint += f'page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&include=gift'
         return endpoint
   
     async def get_value_with_discount_prime_ninja(self, product: dict) -> str:
         return f'R${product.get("attributes")["prime"]["price_with_discount"]}'\
-            if product.get("attributes").get("prime") else 'Não possui desconto com o Prime Ninja'
+            if product.get("attributes").get("prime") else ''
 
     async def get_value_black_friday(self, product: dict) -> str:
         return f'R${product.get("attributes")["offer"]["price"]}'\
-            if product.get("attributes").get("offer") else 'Não foi possível obter o valor da Black Friday'
+            if product.get("attributes").get("offer") else ''
 
     async def get_value_black_friday_with_discount(self, product: dict) -> str:
         return f'R${product.get("attributes")["offer"]["price_with_discount"]}'\
-            if product.get("attributes").get("offer") else 'Não foi possível obter o valor da Black Friday c/ desconto'
+            if product.get("attributes").get("offer") else ''

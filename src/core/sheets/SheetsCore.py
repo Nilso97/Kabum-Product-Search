@@ -1,12 +1,19 @@
 import xlsxwriter
-from src.logs.logger.Logger import Logger
+from typing import Type
+from src.logs.logger.ILogger import ILogger
 from src.core.sheets.ISheetsCore import ISheetsCore
+from src.utils.IConvertValues import IConvertValues
 
 class SheetsCore(ISheetsCore):
 
-    def __init__(self) -> None:
-        self.logger = Logger()
-        self.xlsx = xlsxwriter.Workbook("./kabum_produtos.xlsx")
+    def __init__(
+        self,
+        logger: Type[ILogger],
+        convert_values: Type[IConvertValues]
+    ) -> None:
+        self.logger = logger
+        self.convert_values = convert_values
+        self.xlsx = xlsxwriter.Workbook(filename="./kabum_produtos.xlsx")
         self.work_sheet = self.xlsx.add_worksheet()
 
     def create_xlsx(self, products_list: list[dict]) -> None:
@@ -28,8 +35,11 @@ class SheetsCore(ISheetsCore):
                 f"Erro ao montar o arquivo '.xlsx' contendo os produtos encontrados: {error}")
 
     def create_xlsx_headers(self):
-        header = self.xlsx.add_format({"bold": True, "bg_color": "#f95d00"})
-        self.work_sheet.set_row(0, None, header)
+        header_format = self.xlsx.add_format({
+            "bold": True, 
+            "bg_color": "#f95d00"
+        })
+        self.work_sheet.set_row(0, None, header_format)
         self.work_sheet.write("A1", "Produto")
         self.work_sheet.write("B1", "Descrição")
         self.work_sheet.write("C1", "Valor Atual")

@@ -15,6 +15,6 @@ app.config.from_mapping(config)
 
 cache = Cache(app)
 
-cache.init_app(app)
+cache.init_app(app, config)
 
 app.register_blueprint(consult_products)
