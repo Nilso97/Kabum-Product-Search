@@ -37,22 +37,22 @@ class RequisitionService(IRequisitionService):
                     headers=default_headers,
                     body=body
                 )
-            response = self.connection.getresponse()
+            # TODO adicionar os demais métodos HTTP (caso necessário)
 
-            if not response or (response.status != 200):
+            site_response = self.connection.getresponse()
+            if not site_response or (site_response.status != 200):
                 raise Exception('O site "kabum.com.br" está fora do ar!')
 
-            converted_response = self.convert_bytes_in_str(response=response)
+            converted_response = self.convert_response_data(response=site_response)
         except (Exception) as error:
             converted_response = str(error)
-            self.logger.error(
-                f'Erro ao realizar a requisição HTTP na função "send_http_client()" -> {converted_response}')
+            self.logger.error(f"Erro ao realizar a requisição HTTP: {converted_response}")
         finally:
             return converted_response
 
     def convert_request_params(self, method: str) -> str:
         return method.upper() if method.lower() else method
 
-    def convert_bytes_in_str(self, response: bytes) -> str:
+    def convert_response_data(self, response: bytes) -> str:
         return response.read().decode('utf-8')
     

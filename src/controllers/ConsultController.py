@@ -1,5 +1,5 @@
 import json
-from src.cache import cache
+from src import cache
 from flask import Blueprint, request
 from src.logs.logger.Logger import Logger
 from src.utils.ConvertValues import ConvertValues
@@ -9,14 +9,14 @@ logger = Logger()
 
 convert_data = ConvertValues()
 
-consult_products = Blueprint("consulta", __name__, url_prefix="/consulta-kabum")
+consult_products = Blueprint("consulta", __name__)
 
 @consult_products.route("/pesquisar/<produto>", methods=["POST"])
 @cache.cached(timeout=300)
 def kabum_product_search(produto) -> str:
     if request.data and request.method == "POST":
         json_data = json.loads(request.data)
-        logger.information(f"Buscando o produto '{produto.capitalize()}' no site 'kabum.com.br'")
+        logger.message(f"Buscando o produto '{produto.capitalize()}' no site 'kabum.com.br'")
         min_value = convert_data.convert_values(value=json_data.get("valorMinimo"))
         max_value = convert_data.convert_values(value=json_data.get("valorMaximo"))
         consult_service = KabumConsultService(

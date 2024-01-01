@@ -12,5 +12,5 @@ class IRequisitionService(ABC):
         raise NotImplementedError("Método 'convert_request_params' não foi implementado corretamente")
 
     @abstractmethod
-    def convert_bytes_in_str(response: bytes) -> str:
-        raise NotImplementedError("Método 'convert_bytes_in_str' não foi implementado corretamente")
+    def convert_response_data(response: bytes) -> str:
+        raise NotImplementedError("Método 'convert_response_data' não foi implementado corretamente")

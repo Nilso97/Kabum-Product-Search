@@ -10,10 +10,13 @@ class SheetsCoreTest(unittest.TestCase):
 
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
-        self.xlsx = SheetsCore(logger=Logger(), convert_values=ConvertValues())
+        self.sheets_core = SheetsCore(
+            logger=Logger(), 
+            convert_values=ConvertValues()
+        )
 
-    def test_create_xlsx(self) -> None:
-        self.xlsx.create_xlsx(
+    def test_create_xlsx_with_success(self) -> None:
+        self.sheets_core.create_xlsx(
             products_list=[{
                 "Produto": "teste",
                 "Descrição": "teste",

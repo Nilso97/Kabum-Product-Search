@@ -9,7 +9,7 @@ class RequisitionServiceTest(unittest.TestCase):
         super().__init__(methodName)
         self.http_request = RequisitionService(logger=Logger())
         
-    def test_send_http_request_success(self) -> None:
+    def test_send_http_request_with_success(self) -> None:
         site_response = self.http_request.send_http_client(
             method="get",
             url="https://www.kabum.com.br"

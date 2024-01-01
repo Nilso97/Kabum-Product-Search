@@ -16,7 +16,7 @@ class IKabumConsultService(ABC):
         raise NotImplementedError("Método 'get_products_data' não foi implementado corretamente")
     
     @abstractmethod
-    def consult_pagination(page_number: int, total_pages: int) -> None:
+    def consult_pagination(page_number: int, total_pages: int, consult_tasks: list = []) -> None:
         raise NotImplementedError("Método 'consult_pagination' não foi implementado corretamente")
     
     @abstractmethod
