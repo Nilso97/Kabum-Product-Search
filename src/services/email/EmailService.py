@@ -1,7 +1,6 @@
 import os
 import smtplib
 from typing import Type
-from dotenv import load_dotenv
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.encoders import encode_base64
@@ -23,7 +22,6 @@ class EmailService(IEmailService):
         self.message = MIMEMultipart()
         self.smtp = smtplib.SMTP(host="smtp.gmail.com", port=587)
         self.smtp.starttls()
-        load_dotenv(dotenv_path="./.env")
 
     def send_email(self) -> None:
         try:
