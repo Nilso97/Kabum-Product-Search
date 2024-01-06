@@ -37,16 +37,17 @@ class EmailService(IEmailService):
                 self.email_address, 
                 attached
             )
-            self.logger.message(f"E-mail enviado com sucesso para o endereço '{self.email_address}'")
+            self.logger.message(f"E-mail enviado com sucesso para '{self.email_address}'")
         except (Exception) as error:
+            error_message = str(error)
             self.logger.error(
-                f"Erro ao enviar o e-mail contendo os produtos encontrados: {error}")
-            self.smtp.quit()
+                f"Erro ao enviar o e-mail contendo os produtos encontrados: {error_message}")
         finally:
             self.smtp.quit()
             return
         
     def attach_email_file(self) -> None:
+        self.logger.message("Anexando arquivo 'kabum_produtos.xlsx' ao e-mail")
         attached_part = MIMEBase("application", "octet-stream")
         attached_part.set_payload(open("./kabum_produtos.xlsx", "rb").read())
         encode_base64(attached_part)
@@ -64,6 +65,9 @@ class EmailService(IEmailService):
                     Segue em anexo a planilha contendo os produtos encontrados no dia {actual_date}:
                     </p>
                 </body>
+                <div>
+                    <p style="text-align: center"><strong>Consulta finalizada com sucesso!</strong></p>
+                </div>
             </html>
         """
         self.message["Subject"] = f"Serviço de Consulta de Preços no site da Kabum - {actual_date}"

@@ -21,7 +21,6 @@ class KabumConsultService(IKabumConsultService):
         logger: Type[ILogger]
     ) -> None:
         self.logger = logger
-        self.products_list = []
         self.min_value = min_value
         self.max_value = max_value
         self.search_product = search_product
@@ -35,6 +34,7 @@ class KabumConsultService(IKabumConsultService):
             logger=self.logger, 
             convert_values=self.convert_values
         )
+        self.__products_list: list = []
 
     def consult_service_init(self) -> None:
         asyncio.run(self.get_consult_products())
@@ -43,7 +43,6 @@ class KabumConsultService(IKabumConsultService):
         try:
             self.logger.message("Iniciando a busca por produtos no site 'kabum.com.br' com valor mínimo de " +
                                       f"R${self.min_value} até R${self.max_value}")
-            time.sleep(2)
             product_search_url = await self.get_consult_endpoint(page_number=1)
             consult_response = self.http_request.send_http_client(
                 method='get',
@@ -51,7 +50,7 @@ class KabumConsultService(IKabumConsultService):
                 body=None
             )
 
-            await self.get_products_data(
+            await self.group_products_data(
                 products_data=json.loads(consult_response)
             )
             total_pages = json.loads(consult_response).get("meta")["total_pages_count"]
@@ -61,44 +60,46 @@ class KabumConsultService(IKabumConsultService):
                     total_pages=total_pages
                 )
 
-            if len(self.products_list) > 0:
-                self.sheets_core.create_xlsx(products_list=self.products_list)
+            if len(self.__products_list) > 0:
+                self.sheets_core.create_xlsx(products_list=self.__products_list)
                 self.logger.message(
-                    f"Foram encontrados {len(self.products_list)} produtos, dentre os valores inseridos na pesquisa")
+                    f"Foram encontrados {len(self.__products_list)} produtos, dentre os valores inseridos na pesquisa")
                 self.logger.message("Finalizada com sucesso a busca por produtos no site 'kabum.com.br'")
                 self.email_service.send_email()
             else:
                 self.logger.message("Nenhum produto encontrado para os valores inseridos na pesquisa")
                 return
         except (Exception) as error:
+            error_message = str(error)
             self.logger.error(
-                f"Erro durante a busca por produtos no site da Kabum: {error}")
+                f"Erro durante a busca por produtos no site da Kabum: {error_message}")
 
-    async def get_products_data(self, products_data: dict) -> None:
+    async def group_products_data(self, products_data: dict) -> None:
         for product in products_data.get("data"):
-            if product.get("attributes")["price"] <= self.max_value\
-                and product.get("attributes")["price"] > self.min_value:
-                self.logger.message(
-                    f"Foi encontrado um produto no valor de " +
-                    f"R${product.get('attributes')['price']}, na página {products_data.get('meta')['page']['number']}"
-                )
-                self.products_list.append({
-                    "Id": product.get("id"),
-                    "Produto": product.get("attributes")["title"],
-                    "Descricao": product.get("attributes")["description"],
-                    "Valor atual": f"R${product.get('attributes')['price']}",
-                    "Valor com desconto [Prime Ninja]": await self.get_value_with_discount_prime_ninja(product=product),
-                    "Valor [Black Friday]": await self.get_value_black_friday(product=product),
-                    "Valor com desconto [Black Friday]": await self.get_value_black_friday_with_discount(product=product)
-                })
+            if product.get("attributes")["price"] <= self.max_value:
+                if product.get("attributes")["price"] > self.min_value:
+                    self.logger.message(
+                        f"Foi encontrado um produto no valor de " +
+                        f"R${product.get('attributes')['price']}, na página {products_data.get('meta')['page']['number']}"
+                    )
+                    self.__products_list.append({
+                        "Id": product.get("id"),
+                        "Produto": product.get("attributes")["title"],
+                        "Descricao": product.get("attributes")["description"],
+                        "Valor atual": f"R${product.get('attributes')['price']}",
+                        "Valor com desconto [Prime Ninja]": await self.get_value_with_discount_prime_ninja(product=product),
+                        "Valor [Black Friday]": await self.get_value_black_friday(product=product),
+                        "Valor com desconto [Black Friday]": await self.get_value_black_friday_with_discount(product=product)
+                    })
     
     async def consult_pagination(self, page_number: int, total_pages: int, consult_tasks: list = []) -> None:
         try:
             async with httpx.AsyncClient(timeout=3000, follow_redirects=True) as client:
                 for page_number in range(2, total_pages):
                     self.logger.message(f"Realizando a busca por produtos na página {page_number} de {total_pages}")
+                    consult_url = await self.get_consult_endpoint(page_number=page_number)
                     paginate_response = await client.get(
-                        url=await self.get_consult_endpoint(page_number=page_number),
+                        url=consult_url,
                         headers={
                             "Accept": "application/json, text/plain, */*",
                             "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,es;q=0.6",
@@ -108,14 +109,15 @@ class KabumConsultService(IKabumConsultService):
                     )
                     if paginate_response and (paginate_response.status_code == 200):
                         consult_tasks.append(
-                            self.get_products_data(
+                            self.group_products_data(
                                 products_data=json.loads(paginate_response.text)
                             )
                         )
                 await asyncio.gather(*consult_tasks)
         except (Exception) as error:
+            error_message = str(error)
             self.logger.error(
-                f"Erro durante a busca por produtos na página {page_number}: {error}")
+                f"Erro durante a busca por produtos na página {page_number}: {error_message}")
     
     async def get_consult_endpoint(self, page_number: int) -> str:
         endpoint = "https://servicespub.prod.api.aws.grupokabum.com.br"
@@ -124,8 +126,8 @@ class KabumConsultService(IKabumConsultService):
         return endpoint
   
     async def get_value_with_discount_prime_ninja(self, product: dict) -> str:
-        return f"R${product.get('attributes')['prime']['price_with_discount']}"\
-            if product.get("attributes").get("prime") else ""
+        return f"R${product.get('attributes')['prime']['price_with_discount']}" if product.get(
+            "attributes").get("prime") else ""
 
     async def get_value_black_friday(self, product: dict) -> str:
         return f"R${product.get('attributes')['offer']['price']}"\

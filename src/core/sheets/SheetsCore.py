@@ -30,8 +30,9 @@ class SheetsCore(ISheetsCore):
             self.xlsx.close()
             self.logger.message("Arquivo 'kabum_produtos.xlsx' criado com sucesso!")
         except (Exception) as error:
+            error_message = str(error)
             self.logger.error(
-                f"Erro ao montar o arquivo '.xlsx' contendo os produtos encontrados: {error}")
+                f"Erro ao montar o arquivo '.xlsx' contendo os produtos encontrados: {error_message}")
 
     def create_xlsx_headers(self) -> None:
         header_format = self.xlsx.add_format({
