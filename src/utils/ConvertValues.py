@@ -7,7 +7,8 @@ class ConvertValues(IConvertValues):
     def __init__(self) -> None:
         super().__init__()
 
-    def convert_values(self, value: str) -> int:
+    @staticmethod
+    def convert_values(value: str) -> int:
         if "." in value:
             converted_value = int(value.replace(".", ""))
         if "," in value:
@@ -16,6 +17,7 @@ class ConvertValues(IConvertValues):
             converted_value = int(value)
         return converted_value
     
-    def convert_datetime(self, format: str) -> str:
+    @staticmethod
+    def convert_datetime(format: str) -> str:
         formated_date = datetime.now().strftime(format)
         return formated_date

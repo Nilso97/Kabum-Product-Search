@@ -27,14 +27,14 @@ class EmailService(IEmailService):
     def send_email(self) -> None:
         try:
             self.logger.message("Enviando e-mail contendo a planilha com os produtos encontrados")
-            self.smtp.login(user=self.email_address, password=os.getenv("PASSWORD"))
+            self.smtp.login(user=str(self.email_address), password=str(os.getenv("PASSWORD")))
             actual_date = self.convert_values.convert_datetime(format="%d/%m/%Y")
-            self.make_email_message(email_address=self.email_address, actual_date=actual_date)
+            self.make_email_message(email_address=str(self.email_address), actual_date=actual_date)
             self.attach_email_file()
             attached = self.message.as_string()
             self.smtp.sendmail(
-                self.email_address, 
-                self.email_address, 
+                str(self.email_address), 
+                str(self.email_address), 
                 attached
             )
             self.logger.message(f"E-mail enviado com sucesso para '{self.email_address}'")
@@ -65,9 +65,6 @@ class EmailService(IEmailService):
                     Segue em anexo a planilha contendo os produtos encontrados no dia {actual_date}:
                     </p>
                 </body>
-                <div>
-                    <p style="text-align: center"><strong>Consulta finalizada com sucesso!</strong></p>
-                </div>
             </html>
         """
         self.message["Subject"] = f"Serviço de Consulta de Preços no site da Kabum - {actual_date}"

@@ -1,11 +1,11 @@
 import json
-import time
 import httpx
 import asyncio
-from typing import Type
 from src.logs.logger.ILogger import ILogger
+from typing import Any,Coroutine, Optional, Type
 from src.core.sheets.SheetsCore import SheetsCore
 from src.utils.ConvertValues import ConvertValues
+from src.utils.IConvertValues import IConvertValues
 from src.services.email.EmailService import EmailService
 from src.core.http.RequisitionService import RequisitionService
 from src.services.consult.IKabumConsultService import IKabumConsultService
@@ -28,11 +28,11 @@ class KabumConsultService(IKabumConsultService):
         self.http_request = RequisitionService(logger=self.logger)
         self.sheets_core = SheetsCore(
             logger=self.logger,
-            convert_values=self.convert_values
+            convert_values=IConvertValues
         )
         self.email_service = EmailService(
             logger=self.logger, 
-            convert_values=self.convert_values
+            convert_values=IConvertValues
         )
         self.__products_list: list = []
 
@@ -47,7 +47,7 @@ class KabumConsultService(IKabumConsultService):
             consult_response = self.http_request.send_http_client(
                 method='get',
                 url=product_search_url,
-                body=None
+                body={}
             )
 
             await self.group_products_data(
@@ -74,13 +74,13 @@ class KabumConsultService(IKabumConsultService):
             self.logger.error(
                 f"Erro durante a busca por produtos no site da Kabum: {error_message}")
 
-    async def group_products_data(self, products_data: dict) -> None:
-        for product in products_data.get("data"):
+    async def group_products_data(self, products_data: dict) -> Optional[Coroutine[None, Any, Any]]:
+        for product in products_data["data"]:
             if product.get("attributes")["price"] <= self.max_value:
                 if product.get("attributes")["price"] > self.min_value:
                     self.logger.message(
                         f"Foi encontrado um produto no valor de " +
-                        f"R${product.get('attributes')['price']}, na página {products_data.get('meta')['page']['number']}"
+                        f"R${product['attributes']['price']}, na página {products_data['meta']['page']['number']}"
                     )
                     self.__products_list.append({
                         "Id": product.get("id"),
@@ -91,8 +91,9 @@ class KabumConsultService(IKabumConsultService):
                         "Valor [Black Friday]": await self.get_value_black_friday(product=product),
                         "Valor com desconto [Black Friday]": await self.get_value_black_friday_with_discount(product=product)
                     })
+        return None
     
-    async def consult_pagination(self, page_number: int, total_pages: int, consult_tasks: list = []) -> None:
+    async def consult_pagination(self, page_number: int, total_pages: int, consult_tasks: list = []) -> Optional[Coroutine[None, Any, Any]]:
         try:
             async with httpx.AsyncClient(timeout=3000, follow_redirects=True) as client:
                 for page_number in range(2, total_pages):
@@ -118,21 +119,23 @@ class KabumConsultService(IKabumConsultService):
             error_message = str(error)
             self.logger.error(
                 f"Erro durante a busca por produtos na página {page_number}: {error_message}")
+        finally:
+            return None
     
     async def get_consult_endpoint(self, page_number: int) -> str:
         endpoint = "https://servicespub.prod.api.aws.grupokabum.com.br"
         endpoint += f"/catalog/v2/products-by-category/computadores/{self.search_product}?"
         endpoint += f"page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&include=gift"
         return endpoint
-  
-    async def get_value_with_discount_prime_ninja(self, product: dict) -> str:
-        return f"R${product.get('attributes')['prime']['price_with_discount']}" if product.get(
-            "attributes").get("prime") else ""
+    
+    @staticmethod
+    async def get_value_with_discount_prime_ninja(product: dict) -> str:
+        return f"R${product['attributes']['prime']['price_with_discount']}" if product["attributes"].get("prime") else ""
 
-    async def get_value_black_friday(self, product: dict) -> str:
-        return f"R${product.get('attributes')['offer']['price']}"\
-            if product.get("attributes").get("offer") else ""
+    @staticmethod
+    async def get_value_black_friday(product: dict) -> str:
+        return f"R${product['attributes']['offer']['price']}" if product["attributes"].get("offer") else ""
 
-    async def get_value_black_friday_with_discount(self, product: dict) -> str:
-        return f"R${product.get('attributes')['offer']['price_with_discount']}"\
-            if product.get("attributes").get("offer") else ""
+    @staticmethod
+    async def get_value_black_friday_with_discount(product: dict) -> str:
+        return f"R${product['attributes']['offer']['price_with_discount']}" if product["attributes"].get("offer") else ""
