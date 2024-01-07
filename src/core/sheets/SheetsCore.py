@@ -2,17 +2,11 @@ import xlsxwriter
 from typing import Type
 from src.logs.logger.ILogger import ILogger
 from src.core.sheets.ISheetsCore import ISheetsCore
-from src.utils.IConvertValues import IConvertValues
 
 class SheetsCore(ISheetsCore):
 
-    def __init__(
-        self,
-        logger: Type[ILogger],
-        convert_values: Type[IConvertValues]
-    ) -> None:
+    def __init__(self, logger: Type[ILogger]) -> None:
         self.logger = logger
-        self.convert_values = convert_values
         self.xlsx = xlsxwriter.Workbook(filename="./kabum_produtos.xlsx")
         self.work_sheet = self.xlsx.add_worksheet()
 

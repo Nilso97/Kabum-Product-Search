@@ -6,10 +6,7 @@ from src.core.http.IRequisitionService import IRequisitionService
 
 class RequisitionService(IRequisitionService):
 
-    def __init__(
-        self, 
-        logger: Type[ILogger]
-    ) -> None:
+    def __init__(self, logger: Type[ILogger]) -> None:
         self.logger = logger
         self.connection = http.client.HTTPSConnection(
             host='kabum.com.br', 
@@ -53,6 +50,6 @@ class RequisitionService(IRequisitionService):
     def convert_request_params(self, method: str) -> str:
         return method.upper() if method.lower() else method
 
-    def convert_response_data(self, response: bytes) -> str:
+    def convert_response_data(self, response: http.client.HTTPResponse) -> str:
         return response.read().decode('utf-8')
     
