@@ -4,8 +4,6 @@ import asyncio
 from src.logs.logger.ILogger import ILogger
 from typing import Any,Coroutine, Optional, Type
 from src.core.sheets.SheetsCore import SheetsCore
-from src.utils.ConvertValues import ConvertValues
-from src.utils.IConvertValues import IConvertValues
 from src.services.email.EmailService import EmailService
 from src.core.http.RequisitionService import RequisitionService
 from src.services.consult.IKabumConsultService import IKabumConsultService
@@ -24,15 +22,12 @@ class KabumConsultService(IKabumConsultService):
         self.min_value = min_value
         self.max_value = max_value
         self.search_product = search_product
-        self.convert_values = ConvertValues()
         self.http_request = RequisitionService(logger=self.logger)
         self.sheets_core = SheetsCore(
             logger=self.logger,
-            convert_values=IConvertValues
         )
         self.email_service = EmailService(
             logger=self.logger, 
-            convert_values=IConvertValues
         )
         self.__products_list: list = []
 
@@ -124,7 +119,7 @@ class KabumConsultService(IKabumConsultService):
     
     async def get_consult_endpoint(self, page_number: int) -> str:
         endpoint = "https://servicespub.prod.api.aws.grupokabum.com.br"
-        endpoint += f"/catalog/v2/products-by-category/computadores/{self.search_product}?"
+        endpoint += f"/catalog/v2/products-by-category/computadores/monitores/{self.search_product}?"
         endpoint += f"page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&include=gift"
         return endpoint
     

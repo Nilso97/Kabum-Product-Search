@@ -1,24 +1,19 @@
 import os
 import smtplib
 from typing import Type
+from datetime import datetime
 from email.mime.base import MIMEBase
 from email.mime.text import MIMEText
 from email.encoders import encode_base64
 from src.logs.logger.ILogger import ILogger
 from email.mime.multipart import MIMEMultipart
-from src.utils.IConvertValues import IConvertValues
 from src.services.email.IEmailService import IEmailService
 
 
 class EmailService(IEmailService):
 
-    def __init__(
-        self, 
-        logger: Type[ILogger], 
-        convert_values: Type[IConvertValues]
-    ) -> None:
+    def __init__(self, logger: Type[ILogger]) -> None:
         self.logger = logger
-        self.convert_values = convert_values
         self.message = MIMEMultipart()
         self.email_address = os.getenv("EMAIL")
         self.smtp = smtplib.SMTP(host="smtp.gmail.com", port=587)
@@ -28,7 +23,7 @@ class EmailService(IEmailService):
         try:
             self.logger.message("Enviando e-mail contendo a planilha com os produtos encontrados")
             self.smtp.login(user=str(self.email_address), password=str(os.getenv("PASSWORD")))
-            actual_date = self.convert_values.convert_datetime(format="%d/%m/%Y")
+            actual_date = datetime.now().strftime("%d/%m/%Y")
             self.make_email_message(email_address=str(self.email_address), actual_date=actual_date)
             self.attach_email_file()
             attached = self.message.as_string()
