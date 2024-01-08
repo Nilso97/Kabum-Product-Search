@@ -7,10 +7,9 @@
 
 ### Futuramente...
 -TODO vincular o serviço de scrap com agendamento de execução, utilizando AWS Lambda
-
-Rota de testes: http://127.0.0.1:5000/consulta-kabum/pesquisar/produto/monitor-gamer 
+ http://127.0.0.1:5000/consulta-kabum/pesquisar/produto/monitor-gamer 
 <br>HTTP method [POST]
-<br>body {
+<br>body<br> {
 	"valorMinimo": "1000", 
 	"valorMaximo": "3000"
 }
