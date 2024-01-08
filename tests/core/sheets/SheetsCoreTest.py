@@ -16,12 +16,12 @@ class SheetsCoreTest(unittest.TestCase):
     def test_create_xlsx_with_success(self) -> None:
         self.sheets_core.create_xlsx(
             products_list=[{
-                "Produto": "teste",
-                "Descrição": "teste",
-                "Valor Atual": "teste",
-                "Valor com desconto [Prime Ninja]": "teste",
-                "Valor [Black Friday]": "teste",
-                "Valor com desconto [Black Friday]": "teste"
+                "Produto": "Produto Teste",
+                "Descrição": "Descrição Teste",
+                "Valor Atual": "Valor Teste",
+                "Valor com desconto [Prime Ninja]": "Valor com desconto Teste",
+                "Valor [Black Friday]": "Valor Black Friday",
+                "Valor com desconto [Black Friday]": "Valor Black Friday c/ desconto"
             }
         ])
         self.assertTrue(expr="kabum_produtos.xlsx" in os.listdir())
