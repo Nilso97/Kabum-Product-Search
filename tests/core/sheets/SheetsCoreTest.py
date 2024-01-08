@@ -11,8 +11,7 @@ class SheetsCoreTest(unittest.TestCase):
     def __init__(self, methodName: str = "runTest") -> None:
         super().__init__(methodName)
         self.sheets_core = SheetsCore(
-            logger=Logger(), 
-            convert_values=ConvertValues()
+            logger=Logger()
         )
 
     def test_create_xlsx_with_success(self) -> None:
