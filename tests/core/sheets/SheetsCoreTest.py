@@ -1,5 +1,4 @@
 import os
-import time
 import unittest
 from src.logs.logger.Logger import Logger
 from src.core.sheets.SheetsCore import SheetsCore
@@ -26,7 +25,6 @@ class SheetsCoreTest(unittest.TestCase):
             }
         ])
         self.assertTrue(expr="kabum_produtos.xlsx" in os.listdir())
-        time.sleep(1)
         os.remove("./kabum_produtos.xlsx")
 
     if __name__ == "__main__":
