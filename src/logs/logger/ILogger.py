@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class ILogger(ABC):
 
     @abstractmethod
-    def basic_config(self) -> None:
+    def _basic_config(self) -> None:
         raise NotImplementedError("Método 'basic_config' não foi implementado corretamente")
 
     @staticmethod
