@@ -1,7 +1,6 @@
 import json
 import httpx
 import asyncio
-from src.database.query import get_specific_product
 from src.logs.logger.ILogger import ILogger
 from typing import Any,Coroutine, Optional, Type
 from src.core.sheets.SheetsCore import SheetsCore
@@ -30,11 +29,10 @@ class KabumConsultService(IKabumConsultService):
         self.email_service = EmailService(
             logger=self.logger, 
         )
-        self._products_list: list = []
+        self.__products_list: list = []
 
-    def consult_service_init(self) -> list[dict]:
+    def consult_service_init(self) -> None:
         asyncio.run(self.get_consult_products())
-        return self._products_list
     
     async def get_consult_products(self) -> None:
         try:
@@ -57,10 +55,10 @@ class KabumConsultService(IKabumConsultService):
                     total_pages=total_pages
                 )
 
-            if len(self._products_list) > 0:
-                self.sheets_core.create_xlsx(products_list=self._products_list)
+            if len(self.__products_list) > 0:
+                self.sheets_core.create_xlsx(products_list=self.__products_list)
                 self.logger.message(
-                    f"Foram encontrados {len(self._products_list)} produtos, dentre os valores inseridos na pesquisa")
+                    f"Foram encontrados {len(self.__products_list)} produtos, dentre os valores inseridos na pesquisa")
                 self.logger.message("Finalizada com sucesso a busca por produtos no site 'kabum.com.br'")
                 self.email_service.send_email()
             else:
@@ -79,11 +77,11 @@ class KabumConsultService(IKabumConsultService):
                         f"Foi encontrado um produto no valor de " +
                         f"R${product['attributes']['price']}, na página {products_data['meta']['page']['number']}"
                     )
-                    self._products_list.append({
-                        "Id": int(product.get("id")),
+                    self.__products_list.append({
+                        "Id": product.get("id"),
                         "Produto": product.get("attributes")["title"],
                         "Descricao": product.get("attributes")["description"],
-                        "Valor atual": int(product.get('attributes')['price']),
+                        "Valor atual": f"R${product.get('attributes')['price']}",
                         "Valor com desconto [Prime Ninja]": await self.get_value_with_discount_prime_ninja(product=product),
                         "Valor [Black Friday]": await self.get_value_black_friday(product=product),
                         "Valor com desconto [Black Friday]": await self.get_value_black_friday_with_discount(product=product)
@@ -124,15 +122,15 @@ class KabumConsultService(IKabumConsultService):
         endpoint += f"/catalog/v2/products-by-category/computadores/monitores/{self.search_product}?"
         endpoint += f"page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&include=gift"
         return endpoint
+    
+    @staticmethod
+    async def get_value_with_discount_prime_ninja(product: dict) -> str:
+        return f"R${product['attributes']['prime']['price_with_discount']}" if product["attributes"].get("prime") else ""
 
     @staticmethod
-    async def get_value_with_discount_prime_ninja(product: dict) -> Optional[int]:
-        return int(product['attributes']['prime']['price_with_discount']) if product["attributes"].get("prime") else None
+    async def get_value_black_friday(product: dict) -> str:
+        return f"R${product['attributes']['offer']['price']}" if product["attributes"].get("offer") else ""
 
     @staticmethod
-    async def get_value_black_friday(product: dict) -> Optional[int]:
-        return int(product['attributes']['offer']['price']) if product["attributes"].get("offer") else None
-
-    @staticmethod
-    async def get_value_black_friday_with_discount(product: dict) -> Optional[int]:
-        return int(product['attributes']['offer']['price_with_discount']) if product["attributes"].get("offer") else None
+    async def get_value_black_friday_with_discount(product: dict) -> str:
+        return f"R${product['attributes']['offer']['price_with_discount']}" if product["attributes"].get("offer") else ""
