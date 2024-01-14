@@ -9,3 +9,4 @@ class DatabaseContext(DeclarativeBase):
 
 
 db = SQLAlchemy(model_class=DatabaseContext)
+#teste
