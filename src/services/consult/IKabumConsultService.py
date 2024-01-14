@@ -5,7 +5,7 @@ from typing import Any, Coroutine, Optional
 class IKabumConsultService(ABC):
 
     @abstractmethod
-    def consult_service_init(self) -> None:
+    def consult_service_init(self) -> list[dict]:
         raise NotImplementedError("Método 'consult_service_init' não foi implementado corretamente")
     
     @abstractmethod
@@ -25,13 +25,13 @@ class IKabumConsultService(ABC):
         raise NotImplementedError("Método 'get_consult_endpoint' não foi implementado corretamente")
 
     @staticmethod
-    async def get_value_with_discount_prime_ninja(product: dict) -> str:
+    async def get_value_with_discount_prime_ninja(product: dict) -> Optional[int]:
         raise NotImplementedError("Método 'get_value_with_discount_prime_ninja' não foi implementado corretamente")
 
     @staticmethod
-    async def get_value_black_friday(product: dict) -> str:
+    async def get_value_black_friday(product: dict) -> Optional[int]:
         raise NotImplementedError("Método 'get_value_black_friday' não foi implementado corretamente")
 
     @staticmethod
-    async def get_value_black_friday_with_discount(product: dict) -> str:
+    async def get_value_black_friday_with_discount(product: dict) -> Optional[int]:
         raise NotImplementedError("Método 'get_value_black_friday_with_discount' não foi implementado corretamente")
