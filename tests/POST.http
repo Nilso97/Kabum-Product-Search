@@ -3,5 +3,5 @@ content-type: application/json
 
 {
 	"valorMinimo": "1000", 
-	"valorMaximo": "3000"
+	"valorMaximo": "2000"
 }

@@ -44,7 +44,7 @@ def get_all_products() -> typing.Sequence[Row[tuple[Product]]]:
     return products
 
 def get_specific_product(product) -> list:
-    products = Product.query.filter(Product.produto.contains(product)).order_by(Product.valor_atual).all()
+    products = Product.query.filter(Product.produto.contains(product.capitalize())).order_by(Product.valor_atual).all()
     db.session.close()
     return products
 
@@ -64,7 +64,7 @@ def get_products_from_database(product: dict, products_list: list = []) -> list[
     for product_data in get_specific_product(product=product):
         products_list.append({
             "Produto": product_data.produto,
-            "Descrição": product_data.descricao,
+            # "Descricao": product_data.descricao,
             "Valor Atual": product_data.valor_atual,
             "Valor [Prime Ninja]": product_data.valor_prime_ninja,
             "Valor [Black Friday]": product_data.valor_black_friday,
