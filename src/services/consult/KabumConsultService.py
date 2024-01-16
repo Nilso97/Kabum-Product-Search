@@ -62,7 +62,7 @@ class KabumConsultService(IKabumConsultService):
                 self.logger.message(
                     f"Foram encontrados {len(self._products_list)} produtos, dentre os valores inseridos na pesquisa")
                 self.logger.message("Finalizada com sucesso a busca por produtos no site 'kabum.com.br'")
-                # self.email_service.send_email()
+                self.email_service.send_email()
             else:
                 self.logger.message("Nenhum produto encontrado para os valores inseridos na pesquisa")
                 return

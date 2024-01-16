@@ -1,6 +1,6 @@
 import json
 from src import cache
-from flask import Blueprint, render_template, request
+from flask import Blueprint, request
 from src.logs.logger.Logger import Logger
 from src.services.consult.KabumConsultService import KabumConsultService
 from src.database.query import get_products_from_database, insert_products_data
@@ -26,13 +26,10 @@ def kabum_product_search(produto):
         insert_products_data(consult_result)
         return f"""<div>
             <p style="text-align: center">Consulta finalizada com sucesso!</p>
-            <p style="text-align: center">Foram encontrados {{ total }} produtos relacionados à {{ product }}</p>
+            <p style="text-align: center">Foram encontrados {len(consult_result)} produtos relacionados à {produto.capitalize()}</p>
         </div>"""
     elif request.method == "GET":
         products_list = get_products_from_database(product=produto)
         if len(products_list) <= 0:
             return """<div><p style="text-align: center">Nenhum produto foi encontrado</p></div>"""
-        return render_template(
-            "index.html",
-            products=products_list
-        )
+        return products_list
