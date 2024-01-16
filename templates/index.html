@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Preços Kabum</title>
+</head>
+
+<body>
+    <div>
+        {% for product in products %}
+            <ul>
+                <p><strong>Produto</strong>: {{ product["Produto"] }}</p>
+                <p><strong>Valor atual</strong>: R${{ product["Valor Atual"] }}</p>
+                {% if product["Valor [Prime Ninja]"] %}
+                    <p><strong>Valor Prime Ninja</strong>: R${{ product["Valor [Prime Ninja]"] }}</p>
+                {% elif product["Valor [Black Friday]"] %}
+                    <p><strong>Valor Black Friday</strong>: R${{ product["Valor [Black Friday]"] }}</p>
+                {% elif product["Valor [Black Friday] c/ desconto"] %}
+                    <p><strong>Valor Black Friday com desconto</strong>: R${{ product["Valor [Black Friday] c/ desconto"] }}</p>
+                {% endif %}
+                <br>
+            </ul>
+        {% endfor %}
+    </div>
+</body>
+
+</html>
