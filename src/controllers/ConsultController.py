@@ -1,7 +1,7 @@
 import json
 from src import cache
-from flask import Blueprint, request
 from src.logs.logger.Logger import Logger
+from flask import Blueprint, render_template, request
 from src.services.consult.KabumConsultService import KabumConsultService
 from src.database.query import get_products_from_database, insert_products_data
 
@@ -32,4 +32,4 @@ def kabum_product_search(produto):
         products_list = get_products_from_database(product=produto)
         if len(products_list) <= 0:
             return """<div><p style="text-align: center">Nenhum produto foi encontrado</p></div>"""
-        return products_list
+        return render_template("index.html", products=products_list)
