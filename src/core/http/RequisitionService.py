@@ -8,7 +8,7 @@ class RequisitionService(IRequisitionService):
 
     def __init__(self, logger: Type[ILogger]) -> None:
         self.logger = logger
-        self.connection = http.client.HTTPSConnection(
+        self._connection = http.client.HTTPSConnection(
             host='kabum.com.br', 
             port=443, 
             timeout=2*60
@@ -22,13 +22,13 @@ class RequisitionService(IRequisitionService):
                 '(KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36'
             }
             if request_method == 'GET':
-                self.connection.request(
+                self._connection.request(
                     method=request_method,
                     url=url,
                     headers=default_headers
                 )
             elif request_method == 'POST':
-                self.connection.request(
+                self._connection.request(
                     method=request_method,
                     url=url,
                     headers=default_headers,
@@ -36,7 +36,7 @@ class RequisitionService(IRequisitionService):
                 )
             # TODO adicionar os demais métodos HTTP (caso necessário)
 
-            site_response = self.connection.getresponse()
+            site_response = self._connection.getresponse()
             if not site_response or (site_response.status != 200):
                 raise Exception('O site "kabum.com.br" está fora do ar!')
 
