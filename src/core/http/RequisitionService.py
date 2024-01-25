@@ -47,9 +47,11 @@ class RequisitionService(IRequisitionService):
         finally:
             return converted_response
 
-    def convert_request_params(self, method: str) -> str:
+    @staticmethod
+    def convert_request_params(method: str) -> str:
         return method.upper() if method.lower() else method
 
-    def convert_response_data(self, response: http.client.HTTPResponse) -> str:
+    @staticmethod
+    def convert_response_data(response: http.client.HTTPResponse) -> str:
         return response.read().decode('utf-8')
     
