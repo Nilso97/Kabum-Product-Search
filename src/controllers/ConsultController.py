@@ -7,8 +7,7 @@ from src.database.query import get_products_from_database, insert_products_data
 
 logger = Logger()
 
-consult_blueprint = Blueprint(
-    "consulta", __name__, url_prefix="/consulta-kabum")
+consult_blueprint = Blueprint("consulta", __name__, url_prefix="/consulta-kabum")
 
 
 @consult_blueprint.route("/pesquisar/<produto>", methods=["POST", "GET"])
