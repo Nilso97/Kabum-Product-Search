@@ -1,7 +1,6 @@
 from src import cache
 from flask import Flask
 from dotenv import load_dotenv
-from flask_sqlalchemy import SQLAlchemy
 from src.database.DatabaseContext import db
 from src.controllers.ConsultController import consult_blueprint
 

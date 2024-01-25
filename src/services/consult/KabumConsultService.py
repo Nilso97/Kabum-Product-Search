@@ -1,7 +1,6 @@
 import json
 import httpx
 import asyncio
-from src.database.query import get_specific_product
 from src.logs.logger.ILogger import ILogger
 from typing import Any,Coroutine, Optional, Type
 from src.core.sheets.SheetsCore import SheetsCore

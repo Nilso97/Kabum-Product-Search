@@ -1,30 +1,37 @@
-import typing
-from src.models.Product import Product
-from sqlalchemy import Row, text, null
+from sqlalchemy import text, null
 from src.logs.logger.Logger import Logger
 from src.database.DatabaseContext import db
 
 logger = Logger()
 
 
-def insert_products_data(products_list: list[dict]) -> None:
+def insert_products_data(products_list: list[dict], product_values: list = []) -> None:
     for product in products_list:
-        product_value_1 = f"'{product['Valor com desconto [Prime Ninja]']}'" if product["Valor com desconto [Prime Ninja]"] else null()
-        product_value_2 = f"'{product['Valor [Black Friday]']}'" if product["Valor [Black Friday]"] else null()
-        product_value_3 = f"'{product['Valor com desconto [Black Friday]']}'" if product["Valor com desconto [Black Friday]"] else null()
-        if check_product_exists(product["Id"]):
+        for index, product_key in enumerate(list(product)):
+            if index < 4:
+                continue
+            product_values.append(
+                f"'{product[product_key]}'" if product[product_key] else null()
+            )
+
+        product_prices = (
+            product_values[0],
+            product_values[1],
+            product_values[2]
+        )
+        product_exists_query = db.session.execute(text(
+            f"SELECT id FROM products p WHERE p.id_produto={product['Id']}"
+        ))
+        if len(product_exists_query._allrows()) > 0:
             update_product_values(
                 product=product,
-                product_values=(
-                    product_value_1,
-                    product_value_2,
-                    product_value_3
-                )
+                product_prices=product_prices
             )
             continue
+
+        product_name = product["Produto"].replace("'", "")
         db.session.execute(text(
-            f"""INSERT INTO products 
-            (
+            f"""INSERT INTO products (
                 id_produto, 
                 produto, 
                 valor_atual, 
@@ -33,47 +40,39 @@ def insert_products_data(products_list: list[dict]) -> None:
                 valor_black_friday_desconto
             ) VALUES (
                 '{product["Id"]}',
-                '{product["Produto"].replace("'", "")}',
+                '{product_name}',
                 '{product["Valor atual"]}',
-                {product_value_1},
-                {product_value_2},
-                {product_value_3}        
-            );""")
+                {product_prices[0]},
+                {product_prices[1]},
+                {product_prices[2]}       
+            )""")
         )
+        product_values = []
+
         db.session.commit()
+
     db.session.close()
 
 
-def check_product_exists(product_id: int):
-    product_exists = db.session.execute(
-        text(f"SELECT id FROM products p WHERE p.id_produto={product_id}"))._allrows()
-    return True if len(product_exists) > 0 else False
-
-
-def update_product_values(product: dict, product_values: tuple) -> None:
-    db.session.execute(text(f"""
-        UPDATE products SET 
-        valor_atual = '{product["Valor atual"]}',
-        valor_prime_ninja = {product_values[0]},
-        valor_black_friday = {product_values[1]},
-        valor_black_friday_desconto = {product_values[2]}
-        WHERE id_produto = {product["Id"]} and valor_atual > {product["Valor atual"]}
+def update_product_values(product: dict, product_prices: tuple) -> None:
+    db.session.execute(text(
+        f"""UPDATE products SET 
+        valor_atual='{product["Valor atual"]}',
+        valor_prime_ninja={product_prices[0]},
+        valor_black_friday={product_prices[1]},
+        valor_black_friday_desconto={product_prices[2]}
+        WHERE id_produto={product["Id"]} and valor_atual > {product["Valor atual"]}
     """))
     db.session.commit()
     logger.message(f"Produto ID{product['Id']} atualizado com sucesso!")
 
 
-def get_all_products() -> typing.Sequence[Row[tuple[Product]]]:
-    products = db.session.execute(text("SELECT * FROM products"))._allrows()
-    db.session.close()
-    return products
-
-
 def get_specific_product(product) -> list:
-    products = db.session.execute(
-        text(f"SELECT * FROM products p WHERE p.produto LIKE '%{product}%'"))._allrows()
+    products = db.session.execute(text(
+        f"SELECT * FROM products p WHERE p.produto LIKE '%{product}%'"
+    ))
     db.session.close()
-    return products
+    return products._allrows()
 
 
 def get_products_from_database(product: dict, products_list: list = []) -> list[dict]:
