@@ -1,24 +1,16 @@
 from sqlalchemy import text, null
-from src.logs.logger.Logger import Logger
 from src.database.DatabaseContext import db
 
-logger = Logger()
 
-
-def insert_products_data(products_list: list[dict], product_values: list = []) -> None:
+def insert_products_data(products_list: list[dict], product_prices: list = []) -> None:
     for product in products_list:
-        for index, product_key in enumerate(list(product)):
-            if index < 4:
+        for i, key in enumerate(list(product)):
+            if i < 4:
                 continue
-            product_values.append(
-                f"'{product[product_key]}'" if product[product_key] else null()
+            product_prices.append(
+                f"'{product[key]}'" if product[key] else null()
             )
 
-        product_prices = (
-            product_values[0],
-            product_values[1],
-            product_values[2]
-        )
         product_exists_query = db.session.execute(text(
             f"SELECT id FROM products p WHERE p.id_produto={product['Id']}"
         ))
@@ -47,14 +39,14 @@ def insert_products_data(products_list: list[dict], product_values: list = []) -
                 {product_prices[2]}       
             )""")
         )
-        product_values = []
+        product_prices = []
 
         db.session.commit()
 
     db.session.close()
 
 
-def update_product_values(product: dict, product_prices: tuple) -> None:
+def update_product_values(product: dict, product_prices: list) -> None:
     db.session.execute(text(
         f"""UPDATE products SET 
         valor_atual='{product["Valor atual"]}',
@@ -64,7 +56,6 @@ def update_product_values(product: dict, product_prices: tuple) -> None:
         WHERE id_produto={product["Id"]} and valor_atual > {product["Valor atual"]}
     """))
     db.session.commit()
-    logger.message(f"Produto ID{product['Id']} atualizado com sucesso!")
 
 
 def get_specific_product(product) -> list:
