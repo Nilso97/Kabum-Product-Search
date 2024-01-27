@@ -39,10 +39,10 @@ class KabumConsultService(IKabumConsultService):
         try:
             self.logger.message("Iniciando a busca por produtos no site 'kabum.com.br' com valor mínimo de " +
                                       f"R${self.min_value} até R${self.max_value}")
-            product_search_url = await self.get_consult_endpoint(page_number=1)
+            search_url = await self.get_consult_endpoint(page_number=1)
             consult_response = self.http_request.send_http_client(
                 method='get',
-                url=product_search_url,
+                url=search_url,
                 body={}
             )
 

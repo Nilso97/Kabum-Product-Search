@@ -2,26 +2,30 @@ from sqlalchemy import text, null
 from src.database.DatabaseContext import db
 
 
-def insert_products_data(products_list: list[dict], product_prices: list = []) -> None:
-    for product in products_list:
-        for i, key in enumerate(list(product)):
-            if i < 4:
-                continue
-            product_prices.append(
-                f"'{product[key]}'" if product[key] else null()
-            )
+def get_product_prices(product: dict, max_rows: int = 4, product_prices: list = []) -> list:
+    for row, key in enumerate(list(product)):
+        if row < max_rows:
+            continue
 
+        product_prices.append(
+            f"'{product[key]}'" if product[key] else null()
+        )
+
+
+def insert_products_data(products_list: list[dict]) -> None:
+    for product_data in products_list:
+        product_prices = get_product_prices(product=product_data)
         product_exists_query = db.session.execute(text(
-            f"SELECT id FROM products p WHERE p.id_produto={product['Id']}"
+            f"SELECT id FROM products p WHERE p.id_produto={product_data['Id']}"
         ))
         if len(product_exists_query._allrows()) > 0:
             update_product_values(
-                product=product,
+                product=product_data,
                 product_prices=product_prices
             )
             continue
 
-        product_name = product["Produto"].replace("'", "")
+        product_name = product_data["Produto"].replace("'", "")
         db.session.execute(text(
             f"""INSERT INTO products (
                 id_produto, 
@@ -31,16 +35,14 @@ def insert_products_data(products_list: list[dict], product_prices: list = []) -
                 valor_black_friday, 
                 valor_black_friday_desconto
             ) VALUES (
-                '{product["Id"]}',
+                '{product_data["Id"]}',
                 '{product_name}',
-                '{product["Valor atual"]}',
+                '{product_data["Valor atual"]}',
                 {product_prices[0]},
                 {product_prices[1]},
                 {product_prices[2]}       
             )""")
         )
-        product_prices = []
-
         db.session.commit()
 
     db.session.close()
