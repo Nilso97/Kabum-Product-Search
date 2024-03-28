@@ -22,13 +22,16 @@ class KabumConsultService(IKabumConsultService):
         self.min_value = min_value
         self.max_value = max_value
         self.search_product = search_product
-        self.http_request = RequisitionService(logger=self.logger)
+        self.http_request = RequisitionService(
+            logger=self.logger
+        )
         self.sheets_core = SheetsCore(
-            logger=self.logger,
+            logger=self.logger
         )
         self.email_service = EmailService(
-            logger=self.logger, 
+            logger=self.logger
         )
+        
         self._products_list: list = []
 
     def consult_service_init(self) -> list[dict]:
@@ -99,9 +102,7 @@ class KabumConsultService(IKabumConsultService):
                         url=consult_url,
                         headers={
                             "Accept": "application/json, text/plain, */*",
-                            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,es;q=0.6",
-                            "Sec-Fetch-Mode": "cors",
-                            "Sec-Fetch-Site": "cross-site"
+                            "Accept-Language": "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7,es;q=0.6"
                         }
                     )
                     if paginate_response and (paginate_response.status_code == 200):
@@ -113,8 +114,7 @@ class KabumConsultService(IKabumConsultService):
                 await asyncio.gather(*consult_tasks)
         except (Exception) as error:
             error_message = str(error)
-            self.logger.error(
-                f"Erro durante a busca por produtos na página {page_number}: {error_message}")
+            self.logger.error(f"Erro durante a busca por produtos na página {page_number}: {error_message}")
         finally:
             return None
     
