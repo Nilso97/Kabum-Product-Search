@@ -7,8 +7,8 @@ from src.services.consult.KabumConsultService import KabumConsultService
 class ConsultController:
 
     def __init__(self) -> None:
-        self._product_repository = ProductRepository()
         self.logger = Logger()
+        self._product_repository = ProductRepository()
 
     def get_products(self, product: str):
         products_list = self._product_repository.get_products_from_database(product)

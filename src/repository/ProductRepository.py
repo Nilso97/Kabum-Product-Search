@@ -14,7 +14,9 @@ class ProductRepository:
 
     def insert_products_data(self, products_list: list[dict]) -> None:
         for product_data in products_list:
-            self.check_exists_products(product_data)
+            if self.check_exists_products(product_data):
+                continue
+
             product_prices = self.get_product_prices(product_data)
             db.session.add(Product(
                 id_produto=product_data["Id"],
@@ -26,15 +28,17 @@ class ProductRepository:
             ))
             db.session.commit()
 
-    def check_exists_products(self, product_data: dict):
+    def check_exists_products(self, product_data: dict) -> bool:
         product_prices = self.get_product_prices(product_data)
         exist_products = db.session.query(Product).where(Product.id_produto == product_data["Id"]).all()
         if len(exist_products) > 0:
             self.update_product_prices(product_data, product_prices)
+            return True
+        
+        return False
 
     def update_product_prices(self, product: dict, product_prices: list) -> None:
-        update(Product).where(
-            Product.id_produto == product["Id"] and Product.valor_atual > product["Valor atual"]).values({
+        update(Product).where(Product.id_produto == product["Id"] and Product.valor_atual > product["Valor atual"]).values({
             Product.valor_atual: product["Valor atual"],
             Product.valor_black_friday: product_prices[0] if product_prices else null(),
             Product.valor_black_friday_desconto: product_prices[1] if product_prices and len(product_prices) > 1 else null(),

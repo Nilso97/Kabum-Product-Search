@@ -8,7 +8,6 @@ consult_controller = ConsultController()
 consult_blueprint = Blueprint("consult_blueprint", __name__, url_prefix="/consulta-kabum")
 
 @consult_blueprint.route("/pesquisar/<produto>", methods=["POST"])
-@cache.cached(timeout=5000)
 def search_products(produto: str):
     return consult_controller.search_products(
         produto,

@@ -1,7 +1,7 @@
 import http.client
 from typing import Type
 from src.logs.logger.ILogger import ILogger
-from src.core.http.IRequisitionService import IRequisitionService
+from src.infra.http.IRequisitionService import IRequisitionService
 
 
 class RequisitionService(IRequisitionService):

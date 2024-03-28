@@ -1,6 +1,6 @@
 import unittest
 from src.logs.logger.Logger import Logger
-from src.core.http.RequisitionService import RequisitionService
+from src.infra.http.RequisitionService import RequisitionService
 
 
 class RequisitionServiceTest(unittest.TestCase):
