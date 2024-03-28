@@ -9,7 +9,7 @@ class IKabumConsultService(ABC):
         raise NotImplementedError("Método 'consult_service_init' não foi implementado corretamente")
     
     @abstractmethod
-    def get_consult_products(self):
+    def consult_products(self):
         raise NotImplementedError("Método 'get_consult_products' não foi implementado corretamente")
 
     @abstractmethod
@@ -21,17 +21,17 @@ class IKabumConsultService(ABC):
         raise NotImplementedError("Método 'consult_pagination' não foi implementado corretamente")
     
     @abstractmethod
-    async def get_consult_endpoint(self, page_number: int) -> str:
+    async def make_consult_endpoint(self, page_number: int) -> str:
         raise NotImplementedError("Método 'get_consult_endpoint' não foi implementado corretamente")
 
     @staticmethod
-    async def get_value_with_discount_prime_ninja(product: dict) -> Optional[int]:
+    async def get_price_with_discount_prime_ninja(product: dict) -> Optional[int]:
         raise NotImplementedError("Método 'get_value_with_discount_prime_ninja' não foi implementado corretamente")
 
     @staticmethod
-    async def get_value_black_friday(product: dict) -> Optional[int]:
+    async def get_price_black_friday(product: dict) -> Optional[int]:
         raise NotImplementedError("Método 'get_value_black_friday' não foi implementado corretamente")
 
     @staticmethod
-    async def get_value_black_friday_with_discount(product: dict) -> Optional[int]:
+    async def get_price_black_friday_with_discount(product: dict) -> Optional[int]:
         raise NotImplementedError("Método 'get_value_black_friday_with_discount' não foi implementado corretamente")

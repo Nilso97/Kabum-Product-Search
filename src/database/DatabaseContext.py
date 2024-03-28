@@ -3,6 +3,7 @@ from sqlalchemy.orm import DeclarativeBase
 
 
 class DatabaseContext(DeclarativeBase):
+
     __abstract__ = True
 
 

@@ -5,10 +5,10 @@ from src.logs.logger.ILogger import ILogger
 class Logger(ILogger):
 
     def __init__(self) -> None:
-        self.__basic_config()
+        self._basic_config()
 
     @staticmethod
-    def __basic_config() -> None:
+    def _basic_config() -> None:
         message_format = '%(levelname)s - %(asctime)s - %(message)s'
         logging.basicConfig(level=logging.INFO, format=message_format, datefmt="%d/%m/%Y %H:%M:%S")
 

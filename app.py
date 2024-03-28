@@ -1,19 +1,15 @@
-from src import cache
 from flask import Flask
 from dotenv import load_dotenv
+from src.cache.cache import cache
+from src.config.config import config
 from src.database.DatabaseContext import db
-from src.controllers.ConsultController import consult_blueprint
+from src.routes.routes import consult_blueprint
 
-load_dotenv(dotenv_path="./.env")
-
-config = {
-    "DEBUG": True,
-    "CACHE_TYPE": "SimpleCache",
-    "CACHE_DEFAULT_TIMEOUT": 300,
-    "SQLALCHEMY_DATABASE_URI": "sqlite:///kabum-products.db"
-}
+load_dotenv(".env")
 
 app = Flask(__name__, template_folder="templates")
+
+app.register_blueprint(blueprint=consult_blueprint)
 
 app.config.from_mapping(config)
 
@@ -23,7 +19,3 @@ db.init_app(app)
 
 with app.app_context():
     db.create_all()
-
-app.register_blueprint(
-    blueprint=consult_blueprint,
-)
