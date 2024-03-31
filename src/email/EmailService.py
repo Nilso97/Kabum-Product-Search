@@ -15,23 +15,23 @@ class EmailService(IEmailService):
     def __init__(self, logger: Type[ILogger]) -> None:
         self.logger = logger
         self.message = MIMEMultipart()
-        self.email_address = os.getenv("EMAIL")
-        self.email_password = os.getenv("PASSWORD")
+        self.__email_address = os.getenv("EMAIL")
+        self.__email_password = os.getenv("PASSWORD")
         self.smtp = smtplib.SMTP(host="smtp.gmail.com", port=587)
         self.smtp.starttls()
 
     def send_email(self) -> None:
         try:
-            self.smtp.login(str(self.email_address), str(self.email_password))
-            self.make_email_message(str(self.email_address), datetime.now().strftime("%d/%m/%Y"))
+            self.smtp.login(str(self.__email_address), str(self.__email_password))
+            self.make_email_message(str(self.__email_address), datetime.now().strftime("%d/%m/%Y"))
             self.attach_email_file()
             attached = self.message.as_string()
             self.smtp.sendmail(
-                str(self.email_address), 
-                str(self.email_address), 
+                str(self.__email_address), 
+                str(self.__email_address), 
                 attached
             )
-            self.logger.message(f"E-mail enviado com sucesso para o endereço '{self.email_address}'")
+            self.logger.message(f"E-mail enviado com sucesso para o endereço '{self.__email_address}'")
         except (Exception) as error:
             error_message = str(error)
             self.logger.error(f"Erro ao enviar o e-mail contendo os produtos encontrados: {error_message}")
