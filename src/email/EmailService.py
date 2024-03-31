@@ -25,11 +25,10 @@ class EmailService(IEmailService):
             self.smtp.login(str(self.__email_address), str(self.__email_password))
             self.make_email_message(datetime.now().strftime("%d/%m/%Y"))
             self.attach_email_file()
-            attached = self.message.as_string()
             self.smtp.sendmail(
                 str(self.__email_address), 
                 str(self.__email_address), 
-                attached
+                self.message.as_string()
             )
             self.logger.message(f"E-mail enviado com sucesso para o endereço '{self.__email_address}'")
         except (Exception) as error:
