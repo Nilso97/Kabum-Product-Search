@@ -29,7 +29,7 @@ class ConsultController:
         consult_result = consult_service.consult_service_init()
         
         self.logger.message("Salvando no Banco de dados os resultados encontrados\n\nAguarde...")
-        self._product_repository.insert_products_data(consult_result)
+        self.__product_repository.insert_products_data(consult_result)
         
         return f"""<div>
             <p style="text-align: center">Consulta finalizada com sucesso!</p>
