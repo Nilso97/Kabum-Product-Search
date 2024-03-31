@@ -8,10 +8,10 @@ class ConsultController:
 
     def __init__(self) -> None:
         self.logger = Logger()
-        self._product_repository = ProductRepository()
+        self.__product_repository = ProductRepository()
 
     def get_products(self, product: str):
-        products_list = self._product_repository.get_products_from_database(product)
+        products_list = self.__product_repository.get_products_from_database(product)
         if len(products_list) <= 0:
             return """<div><p style="text-align: center">Nenhum produto foi encontrado</p></div>"""
         
