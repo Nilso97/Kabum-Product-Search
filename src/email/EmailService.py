@@ -23,7 +23,7 @@ class EmailService(IEmailService):
     def send_email(self) -> None:
         try:
             self.smtp.login(str(self.__email_address), str(self.__email_password))
-            self.make_email_message(str(self.__email_address), datetime.now().strftime("%d/%m/%Y"))
+            self.make_email_message(datetime.now().strftime("%d/%m/%Y"))
             self.attach_email_file()
             attached = self.message.as_string()
             self.smtp.sendmail(
@@ -48,7 +48,7 @@ class EmailService(IEmailService):
         )
         self.message.attach(attached_part)
         
-    def make_email_message(self, email_address: str, actual_date: str) -> None:
+    def make_email_message(self, actual_date: str) -> None:
         self.message["Subject"] = f"Serviço de Consulta de Preços no site da Kabum - {actual_date}"
         email_template = """
             <html>
@@ -59,4 +59,4 @@ class EmailService(IEmailService):
                 </body>
             </html>
         """
-        self.message.attach(MIMEText(email_template.format(email_address, actual_date), "html"))
+        self.message.attach(MIMEText(email_template.format(self.__email_address, actual_date), "html"))
