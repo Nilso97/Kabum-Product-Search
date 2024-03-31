@@ -12,5 +12,5 @@ class IEmailService(ABC):
         raise NotImplementedError("Método 'attach_email_file' não foi implementado corretamente")
 
     @abstractmethod
-    def make_email_message(self, email_address: str, actual_date: str) -> None:
+    def make_email_message(self, actual_date: str) -> None:
         raise NotImplementedError("Método 'make_email_message' não foi implementado corretamente")
