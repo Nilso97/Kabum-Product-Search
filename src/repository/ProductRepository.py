@@ -41,7 +41,7 @@ class ProductRepository:
     def update_product_prices(self, product: dict, product_prices: list) -> None:
         db.session.execute(
             update(Product).where(
-(Product.kabum_product_id == product["Id"]) & (Product.product_price > product["Valor atual"])).values({
+                (Product.kabum_product_id == product["Id"]) & (Product.product_price > product["Valor atual"])).values({
                 Product.product_price: product["Valor atual"],
                 Product.product_black_friday_price: product_prices[0] if product_prices else null(),
                 Product.product_black_friday_price_with_discount: product_prices[1] if product_prices and len(product_prices) > 1 else null(),
