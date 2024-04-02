@@ -1,4 +1,5 @@
 from src.models.Product import Product
+from src.logs.logger.Logger import Logger
 from sqlalchemy import text, null, update
 from src.database.DatabaseContext import db
 
@@ -22,9 +23,9 @@ class ProductRepository:
                 kabum_product_id=product_data["Id"],
                 product_name=product_data["Produto"].replace("'", ""),
                 product_price=product_data["Valor atual"],
+                product_prime_ninja_price=product_prices[2] if product_prices and len(product_prices) > 2 else null(),
                 product_black_friday_price=product_prices[0] if product_prices else null(),
-                product_black_friday_price_with_discount=product_prices[1] if product_prices and len(product_prices) > 1 else null(),
-                product_prime_ninja_price=product_prices[2] if product_prices and len(product_prices) > 2 else null()
+                product_black_friday_price_with_discount=product_prices[1] if product_prices and len(product_prices) > 1 else null()
             ))
             db.session.commit()
 
@@ -38,12 +39,18 @@ class ProductRepository:
         return False
 
     def update_product_prices(self, product: dict, product_prices: list) -> None:
-        update(Product).where(Product.kabum_product_id == product["Id"] and Product.product_price > product["Valor atual"]).values({
-            Product.product_price: product["Valor atual"],
-            Product.product_black_friday_price: product_prices[0] if product_prices else null(),
-            Product.product_black_friday_price_with_discount: product_prices[1] if product_prices and len(product_prices) > 1 else null(),
-            Product.product_prime_ninja_price: product_prices[2] if product_prices and len(product_prices) > 2 else null()
-        })
+        db.session.execute(
+            update(Product).where(
+                (Product.kabum_product_id == product["Id"]) & (Product.product_price > product["Valor atual"])
+            ).values({
+                Product.product_price: product["Valor atual"],
+                Product.product_black_friday_price: product_prices[0] if product_prices else null(),
+                Product.product_black_friday_price_with_discount: product_prices[1] if product_prices and len(product_prices) > 1 else null(),
+                Product.product_prime_ninja_price: product_prices[2] if product_prices and len(product_prices) > 2 else null()
+            }))
+        
+        Logger.message(f"Produto de id {product['Id']} foi atualizado com sucesso!")
+        db.session.commit()
 
     def get_specific_product(self, product: str) -> list:
         return db.session.execute(text(f"SELECT * FROM kabum_products p WHERE p.product_name LIKE '%{product}%'"))._allrows()

@@ -31,7 +31,7 @@ class KabumConsultService(IKabumConsultService):
             logger=self.logger
         )
         self.products_list: list = []
-        self.base_url = "https://servicespub.prod.api.aws.grupokabum.com.br"
+        self.base_url: str = "https://servicespub.prod.api.aws.grupokabum.com.br"
 
     def consult_service_init(self) -> list[dict]:
         asyncio.run(self.consult_products())
@@ -60,7 +60,7 @@ class KabumConsultService(IKabumConsultService):
                 self.logger.message("Finalizada com sucesso a busca por produtos no site 'kabum.com.br'")
 
                 self.logger.message("Enviando e-mail contendo a planilha com os produtos encontrados\n\nAguarde...")
-                self.email_service.send_email()
+                # self.email_service.send_email()
             else:
                 self.logger.message("Nenhum produto encontrado para os valores inseridos na pesquisa")
                 return
