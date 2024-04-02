@@ -1,39 +1,39 @@
-from sqlalchemy import Integer, String
+from sqlalchemy import Integer, Integer
 from src.database.DatabaseContext import db
 from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Product(db.Model):
-    
-    __tablename__ = "products"
+
+    __tablename__ = "kabum_products"
 
     id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
         unique=True
     )
-    id_produto: Mapped[int] = mapped_column(
+    kabum_product_id: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
         unique=True
     )
-    produto: Mapped[str] = mapped_column(
-        String,
+    product_name: Mapped[str] = mapped_column(
+        Integer,
         nullable=False
     )
-    valor_atual: Mapped[str] = mapped_column(
-        String,
+    product_price: Mapped[int] = mapped_column(
+        Integer,
         nullable=False
     )
-    valor_prime_ninja: Mapped[str] = mapped_column(
-        String,
+    product_prime_ninja_price: Mapped[int] = mapped_column(
+        Integer,
         nullable=True
     )
-    valor_black_friday: Mapped[str] = mapped_column(
-        String,
+    product_black_friday_price: Mapped[int] = mapped_column(
+        Integer,
         nullable=True
     )
-    valor_black_friday_desconto: Mapped[str] = mapped_column(
-        String,
+    product_black_friday_price_with_discount: Mapped[int] = mapped_column(
+        Integer,
         nullable=True
     )

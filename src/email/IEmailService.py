@@ -6,6 +6,10 @@ class IEmailService(ABC):
     @abstractmethod
     def send_email(self) -> None:
         raise NotImplementedError("Método 'send_email' não foi implementado corretamente")
+    
+    @abstractmethod
+    def make_email_login(self) -> None:
+        raise NotImplementedError("Método 'make_email_login' não foi implementado corretamente") 
 
     @abstractmethod
     def attach_email_file(self) -> None:

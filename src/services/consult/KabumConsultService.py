@@ -1,30 +1,29 @@
 import json
 import httpx
 import asyncio
+import requests
 from typing import Optional, Type
 from src.logs.logger.ILogger import ILogger
 from src.email.EmailService import EmailService
 from src.core.sheets.SheetsCore import SheetsCore
-from src.infra.http.RequisitionService import RequisitionService
 from src.services.consult.IKabumConsultService import IKabumConsultService
 
 
 class KabumConsultService(IKabumConsultService):
 
     def __init__(
-        self, 
-        min_value: int, 
-        max_value: int, 
+        self,
+        min_value: int,
+        max_value: int,
+        category: str,
         search_product: str,
         logger: Type[ILogger]
     ) -> None:
         self.logger = logger
         self.min_value = min_value
         self.max_value = max_value
+        self.category = category
         self.search_product = search_product
-        self.http_request = RequisitionService(
-            logger=self.logger
-        )
         self.sheets_core = SheetsCore(
             logger=self.logger
         )
@@ -36,24 +35,22 @@ class KabumConsultService(IKabumConsultService):
 
     def consult_service_init(self) -> list[dict]:
         asyncio.run(self.consult_products())
-        
+
         return self.products_list
-    
+
     async def consult_products(self) -> None:
         self.logger.message(f"Buscando produtos no site 'kabum.com.br' com valor entre R${self.min_value} até R${self.max_value}")
         try:
-            consult_response = self.http_request.send_http_client(
-                method='get',
-                url=await self.make_consult_endpoint(page_number=1),
-                body={}
+            consult_response = requests.get(
+                url=await self.make_consult_endpoint(page_number=1)
             )
 
-            await self.group_products_data(products_data=json.loads(consult_response))
-            
-            total_pages = json.loads(consult_response).get("meta")["total_pages_count"]
+            await self.group_products_data(products_data=json.loads(consult_response.text))
+
+            total_pages = json.loads(consult_response.text).get("meta")["total_pages_count"]
             if total_pages > 1:
                 await self.consult_pagination(
-                    page_number=2, 
+                    page_number=2,
                     total_pages=total_pages
                 )
 
@@ -61,24 +58,27 @@ class KabumConsultService(IKabumConsultService):
                 self.sheets_core.create_xlsx(products_list=self.products_list)
                 self.logger.message(f"Foram encontrados {len(self.products_list)} produtos, dentre os valores inseridos na pesquisa")
                 self.logger.message("Finalizada com sucesso a busca por produtos no site 'kabum.com.br'")
-                
+
                 self.logger.message("Enviando e-mail contendo a planilha com os produtos encontrados\n\nAguarde...")
                 self.email_service.send_email()
             else:
                 self.logger.message("Nenhum produto encontrado para os valores inseridos na pesquisa")
                 return
+
         except (Exception) as error:
-            error_message = str(error)
-            self.logger.error(f"Erro durante a busca por produtos no site da Kabum: {error_message}")
+            self.logger.error(f"Erro durante a busca por produtos no site da Kabum: {error}")
 
     async def group_products_data(self, products_data: dict) -> None:
         for product in products_data["data"]:
-            if product.get("attributes")["price"] <= self.max_value and product.get("attributes")["price"] > self.min_value:
+            if (
+                product.get("attributes")["price"] <= self.max_value
+                and product.get("attributes")["price"] > self.min_value
+            ):
                 self.logger.message(
-                    f"Foi encontrado um produto no valor de " +
-                    f"R${product['attributes']['price']}, na página {products_data['meta']['page']['number']}"
+                    f"Foi encontrado um produto no valor de "
+                    + f"R${product['attributes']['price']}, na página {products_data['meta']['page']['number']}"
                 )
-                
+
                 self.products_list.append({
                     "Id": int(product.get("id")),
                     "Produto": product.get("attributes")["title"],
@@ -88,7 +88,7 @@ class KabumConsultService(IKabumConsultService):
                     "Valor [Black Friday]": await self.get_price_black_friday(product=product),
                     "Valor com desconto [Black Friday]": await self.get_price_black_friday_with_discount(product=product)
                 })
-    
+
     async def consult_pagination(self, page_number: int, total_pages: int, consult_tasks: list = []) -> None:
         async with httpx.AsyncClient(timeout=3000, follow_redirects=True) as client:
             for page_number in range(2, total_pages):
@@ -102,15 +102,17 @@ class KabumConsultService(IKabumConsultService):
                 )
                 if consult_response and (consult_response.status_code == 200):
                     consult_tasks.append(
-                        self.group_products_data(products_data=json.loads(consult_response.text))
+                        self.group_products_data(
+                            products_data=json.loads(consult_response.text)
+                        )
                     )
-                    
+
             await asyncio.gather(*consult_tasks)
-    
+
     async def make_consult_endpoint(self, page_number: int) -> str:
-        consult_endpoint = f"{self.base_url}/catalog/v2/products-by-category/computadores/monitores/{self.search_product}?"
+        consult_endpoint = f"{self.base_url}/catalog/v2/products-by-category/{self.category}/{self.search_product}?"
         consult_endpoint += f"page_number={page_number}&page_size=20&facet_filters=&sort=most_searched&include=gift"
-        
+
         return consult_endpoint
 
     @staticmethod

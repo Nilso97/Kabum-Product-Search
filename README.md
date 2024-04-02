@@ -15,3 +15,6 @@ body: {
 	"valorMinimo": "1000", 
 	"valorMaximo": "3000"
 }
+
+https://www.kabum.com.br/computadores/impressoras
+https://www.kabum.com.br/<categoria>/<produto>
