@@ -2,7 +2,6 @@ import os
 import unittest
 from src.logs.logger.Logger import Logger
 from src.core.sheets.SheetsCore import SheetsCore
-from src.utils.ConvertValues import ConvertValues
 
 
 class SheetsCoreTest(unittest.TestCase):
@@ -24,6 +23,7 @@ class SheetsCoreTest(unittest.TestCase):
                 "Valor com desconto [Black Friday]": "Valor Black Friday c/ desconto"
             }
         ])
+        
         self.assertTrue(expr="kabum_produtos.xlsx" in os.listdir())
         os.remove("./kabum_produtos.xlsx")
 
