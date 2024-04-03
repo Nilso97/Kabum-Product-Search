@@ -22,9 +22,9 @@ class ProductRepository:
                 kabum_product_id=product_data["Id"],
                 product_name=product_data["Produto"].replace("'", ""),
                 product_price=product_data["Valor atual"],
-                product_prime_ninja_price=self.get_product_prime_ninja_price(product_prices),
-                product_black_friday_price=self.get_product_black_friday_price(product_prices),
-                product_black_friday_price_with_discount=self.get_product_black_friday_price_with_discount(product_prices)
+                product_prime_ninja_price=self.get_prime_ninja_price(product_prices),
+                product_black_friday_price=self.get_bf_price(product_prices),
+                product_black_friday_price_with_discount=self.get_bf_price_with_discount(product_prices)
             ))
             db.session.commit()
 
@@ -42,21 +42,19 @@ class ProductRepository:
             (Product.kabum_product_id == product["Id"])
             & (Product.product_price > product["Valor atual"])).values({
                 Product.product_price: product["Valor atual"],
-                Product.product_black_friday_price: self.get_product_black_friday_price(
-                    product_prices
-                ),
-                Product.product_black_friday_price_with_discount: self.get_product_black_friday_price_with_discount(
-                    product_prices
-                ),
-                Product.product_prime_ninja_price: self.get_product_prime_ninja_price(
-                    product_prices
-                )
+                Product.product_black_friday_price: self.get_bf_price(product_prices),
+                Product.product_black_friday_price_with_discount: self.get_bf_price_with_discount(product_prices),
+                Product.product_prime_ninja_price: self.get_prime_ninja_price(product_prices)
             }))
-
+        
         db.session.commit()
 
     def get_specific_product(self, product: str) -> list:
-        return db.session.execute(text(f"SELECT * FROM kabum_products p WHERE p.product_name LIKE '%{product}%'"))._allrows()
+        query = db.session.execute(text(f"""
+            SELECT * FROM kabum_products p WHERE p.product_name LIKE '%{product}%' or p.product_name REGEXP "\w{product}\w";
+        """))
+
+        return query._allrows()
 
     def get_products_from_database(self, product: dict, products_list: list = []) -> list[dict]:
         for product_data in self.get_specific_product(product):
@@ -70,11 +68,11 @@ class ProductRepository:
 
         return products_list
 
-    def get_product_black_friday_price(self, product_prices: list) -> int: 
+    def get_bf_price(self, product_prices: list) -> int: 
         return product_prices[0] if product_prices else null()
     
-    def get_product_black_friday_price_with_discount(self, product_prices: list) -> int: 
+    def get_bf_price_with_discount(self, product_prices: list) -> int: 
         return product_prices[1] if product_prices and len(product_prices) > 1 else null()
     
-    def get_product_prime_ninja_price(self, product_prices: list) -> int:
+    def get_prime_ninja_price(self, product_prices: list) -> int:
         return product_prices[2] if product_prices and len(product_prices) > 2 else null()

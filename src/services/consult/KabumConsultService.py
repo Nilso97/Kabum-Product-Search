@@ -41,9 +41,9 @@ class KabumConsultService(IKabumConsultService):
     async def consult_products(self) -> None:
         self.logger.message(f"Buscando produtos no site 'kabum.com.br' com valor entre R${self.min_value} até R${self.max_value}")
         try:
-            consult_response = requests.get(
-                url=await self.make_consult_endpoint(page_number=1)
-            )
+            consult_response = requests.get(url=await self.make_consult_endpoint(page_number=1))
+            if (consult_response.status_code >= 404):
+                return
 
             await self.group_products_data(products_data=json.loads(consult_response.text))
 

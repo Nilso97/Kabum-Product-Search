@@ -13,7 +13,7 @@ class SheetsCore(ISheetsCore):
 
     def create_xlsx(self, products_list: list[dict]) -> None:
         try:
-            self.logger.message("Montando o arquivo '.xlsx' que contém todos os produtos encontrados")
+            self.logger.message("Montando o arquivo 'kabum_produtos.xlsx' que contém todos os produtos encontrados")
             self.create_xlsx_headers()
 
             for row, product in enumerate(products_list, 2):
@@ -26,7 +26,7 @@ class SheetsCore(ISheetsCore):
 
             self.logger.message("Arquivo 'kabum_produtos.xlsx' criado com sucesso!")
         except (Exception) as error:
-            self.logger.error(f"Erro ao montar o arquivo '.xlsx' contendo os produtos encontrados - {error}")
+            self.logger.error(f"Erro ao montar o arquivo 'kabum_produtos.xlsx' contendo os produtos encontrados - {error}")
         finally:
             self.xlsx.close()
 
