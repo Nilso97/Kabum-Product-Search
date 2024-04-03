@@ -50,9 +50,7 @@ class ProductRepository:
         db.session.commit()
 
     def get_specific_product(self, product: str) -> list:
-        query = db.session.execute(text(f"""
-            SELECT * FROM kabum_products p WHERE p.product_name LIKE '%{product}%' or p.product_name REGEXP "\w{product}\w";
-        """))
+        query = db.session.execute(text(f"SELECT * FROM kabum_products p WHERE p.product_name ILIKE '%{product}%';"))
 
         return query._allrows()
 

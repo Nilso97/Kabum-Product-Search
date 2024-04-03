@@ -1,5 +1,5 @@
-from sqlalchemy import Integer, Integer
 from src.database.DatabaseContext import db
+from sqlalchemy import Integer, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -21,7 +21,7 @@ class Product(db.Model):
     )
     _product_name: Mapped[str] = mapped_column(
         "product_name",
-        Integer,
+        String,
         nullable=False
     )
     _product_price: Mapped[int] = mapped_column(
