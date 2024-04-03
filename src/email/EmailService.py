@@ -16,7 +16,6 @@ class EmailService(IEmailService):
         self.logger = logger
         self.__email_address = os.getenv("EMAIL")
         self.__email_password = os.getenv("PASSWORD")
-
         self.mail_message = MIMEMultipart()
         self.smtp = smtplib.SMTP(host="smtp.gmail.com", port=587)
         self.smtp.starttls()

@@ -1,6 +1,6 @@
 import json
-from src.config.cache.cache import cache
 from flask import Blueprint, request
+from src.config.cache.cache import cache
 from src.controllers.ConsultController import ConsultController
 
 consult_controller = ConsultController()
