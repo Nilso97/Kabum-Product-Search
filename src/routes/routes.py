@@ -19,6 +19,6 @@ def search_products(category: str, product: str):
 
 
 @consult_blueprint.route("/produtos/<produto>", methods=["GET"])
-@cache.cached(timeout=3000)
+@cache.cached(timeout=300)
 def get_products(produto: str):
     return consult_controller.get_products(produto)
