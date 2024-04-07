@@ -2,6 +2,11 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+
+# files
+kabum_produtos.xlx
+*.xlx
 
 # C extensions
 *.so
