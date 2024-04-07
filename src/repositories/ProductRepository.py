@@ -12,7 +12,7 @@ class ProductRepository:
 
             product_prices.append(product[key] if product[key] else null())
 
-    def save_products_data(self, products_list: list[dict]) -> None:
+    def save_products_data(self, products_list: list) -> None:
         for product_data in products_list:
             if self.check_products_exists(product_data):
                 continue
@@ -23,8 +23,8 @@ class ProductRepository:
                 product_name=product_data["Produto"].replace("'", ""),
                 product_price=product_data["Valor atual"],
                 product_prime_ninja_price=self.get_prime_ninja_price(product_prices),
-                product_black_friday_price=self.get_bf_price(product_prices),
-                product_black_friday_price_with_discount=self.get_bf_price_with_discount(product_prices)
+                product_black_friday_price=self.get_black_friday_price(product_prices),
+                product_black_friday_price_with_discount=self.get_black_friday_price_with_discount(product_prices)
             ))
             db.session.commit()
 
@@ -39,14 +39,19 @@ class ProductRepository:
 
     def update_product_prices(self, product: dict, product_prices: list) -> None:
         db.session.execute(update(Product).where(
-            (Product.kabum_product_id == product["Id"])
-            & (Product.product_price > product["Valor atual"])).values({
+            (Product.kabum_product_id == product["Id"]) & (Product.product_price > product["Valor atual"])).values({
                 Product.product_price: product["Valor atual"],
-                Product.product_black_friday_price: self.get_bf_price(product_prices),
-                Product.product_black_friday_price_with_discount: self.get_bf_price_with_discount(product_prices),
-                Product.product_prime_ninja_price: self.get_prime_ninja_price(product_prices)
+                Product.product_black_friday_price: self.get_black_friday_price(
+                    product_prices
+                ),
+                Product.product_black_friday_price_with_discount: self.get_black_friday_price_with_discount(
+                    product_prices
+                ),
+                Product.product_prime_ninja_price: self.get_prime_ninja_price(
+                    product_prices
+                )
             }))
-        
+
         db.session.commit()
 
     def get_specific_product(self, product: str) -> list:
@@ -54,7 +59,7 @@ class ProductRepository:
 
         return query._allrows()
 
-    def get_products_from_database(self, product: dict, products_list: list = []) -> list[dict]:
+    def get_products_from_database(self, product: dict, products_list: list = []) -> list:
         for product_data in self.get_specific_product(product):
             products_list.append({
                 "Produto": product_data.product_name,
@@ -66,10 +71,10 @@ class ProductRepository:
 
         return products_list
 
-    def get_bf_price(self, product_prices: list) -> int: 
+    def get_black_friday_price(self, product_prices: list) -> int: 
         return product_prices[0] if product_prices else null()
     
-    def get_bf_price_with_discount(self, product_prices: list) -> int: 
+    def get_black_friday_price_with_discount(self, product_prices: list) -> int: 
         return product_prices[1] if product_prices and len(product_prices) > 1 else null()
     
     def get_prime_ninja_price(self, product_prices: list) -> int:

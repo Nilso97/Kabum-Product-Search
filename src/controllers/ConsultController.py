@@ -1,21 +1,22 @@
+from typing import Type
 from flask import render_template
-from src.logs.logger.Logger import Logger
-from src.repository.ProductRepository import ProductRepository
+from src.logs.logger.ILogger import ILogger
+from src.services.ProductDataService import ProductDataService
 from src.services.consult.KabumConsultService import KabumConsultService
 
 
 class ConsultController:
 
-    def __init__(self) -> None:
-        self.logger = Logger()
-        self.__product_repository = ProductRepository()
+    def __init__(self, logger: Type[ILogger]) -> None:
+        self.logger = logger
+        self.product_data_service = ProductDataService()
 
     def get_products(self, product: str):
-        products_list = self.__product_repository.get_products_from_database(product)
-        if len(products_list) <= 0:
+        products_data_list = self.product_data_service.get_products_data(product)
+        if len(products_data_list) <= 0:
             return """<div><p style="text-align: center">Nenhum produto foi encontrado</p></div>"""
 
-        return render_template("index.html", products=products_list)
+        return render_template("index.html", products=products_data_list)
 
     def search_products(self, category: str, product: str, min_value: str, max_value: str):
         consult_service = KabumConsultService(
@@ -30,7 +31,7 @@ class ConsultController:
         consult_result = consult_service.consult_service_init()
 
         self.logger.message("Salvando no Banco de dados os resultados encontrados\n\nAguarde...")
-        self.__product_repository.save_products_data(consult_result)
+        self.product_data_service.save_products_data(consult_result)
 
         return f"""<div>
             <p style="text-align: center">Consulta finalizada com sucesso!</p>

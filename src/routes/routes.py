@@ -1,9 +1,10 @@
 import json
 from flask import Blueprint, request
 from src.config.cache.cache import cache
+from src.logs.logger.Logger import Logger
 from src.controllers.ConsultController import ConsultController
 
-consult_controller = ConsultController()
+consult_controller = ConsultController(Logger())
 
 consult_blueprint = Blueprint("consult_blueprint", __name__, url_prefix="/consulta-kabum")
 
